@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
 
-// #[derive(Debug)]
 pub fn read_txt(day: String) -> String {
     // read in puzzle input: dayXX.txt
     let suffix: &str = ".txt";
@@ -38,9 +37,6 @@ fn main() {
 
     for line in line_vec {
         let mut all_cubes: Vec<HashMap<&str, i32>> = vec![];
-        // if (line.len() as i32) < 1 {
-        //     continue;
-        // }
 
         game_count += 1;
 
@@ -133,5 +129,3 @@ fn main() {
 
     println!("\nThe result is: {:?}", sum);
 }
-
-// 364 too low

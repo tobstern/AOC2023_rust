@@ -13,7 +13,6 @@ pub fn read_txt(day: String) -> String {
     return text;
 }
 
-// #[derive(PartialOrd)]
 fn check_adj(
     (i, j): &(i32, i32),
     scheme: &HashMap<(i32, i32), char>,
@@ -30,8 +29,6 @@ fn check_adj(
         (0, -1),
         (1, -1),
     ]);
-
-    // let test_str: String = "0123456789.".to_string();
 
     let mut cont: bool = false;
     let mut pos: (i32, i32) = (0, 0);
@@ -179,5 +176,3 @@ fn main() {
     println!("\nThe result is: {:?}", sum);
     // println!("{}", '.'.is_numeric());
 }
-
-// 4023864 too high

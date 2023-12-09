@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
 
-// #[derive(Debug)]
 pub fn read_txt(day: String) -> String {
     // read in puzzle input: dayXX.txt
     let suffix: &str = ".txt";
@@ -69,9 +68,6 @@ fn main() {
         let mut cubes: HashMap<&str, i32> = HashMap::new();
 
         for subset in subsets {
-            // if (subset[0].len() as i32) < 1 {
-            //     continue;
-            // } else {
             // match each color and save the number to it
             for (_, color) in subset.iter().enumerate() {
                 if (color.len() as i32) < 2 {
@@ -129,5 +125,3 @@ fn main() {
 
     println!("\nThe result is: {:?}", sum);
 }
-
-// 2286 too low;

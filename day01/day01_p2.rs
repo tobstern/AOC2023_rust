@@ -1,6 +1,5 @@
 use std::fs;
 
-// #[derive(Debug)]
 pub fn read_txt(day: String) -> String {
     // read in puzzle input: dayXX.txt
     let suffix: &str = ".txt";
@@ -163,6 +162,3 @@ fn main() {
 
     println!("\nThe result is: {:?}", sum);
 }
-
-// 53896 too high
-// 47676 too low
