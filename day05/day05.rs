@@ -1,7 +1,6 @@
 use std::fs;
 use std::time::Instant;
 
-// #[derive(Debug)]
 pub fn read_txt(day: String) -> String {
     // read in puzzle input: dayXX.txt
     let suffix: &str = ".txt";
@@ -82,17 +81,6 @@ fn main() {
     // println!("{:?}", seeds);
     // println!("{:?}", &map);
 
-    // the map is structured as:
-    // let connections: [&str; 7] = [
-    //     "seed-to-soil",
-    //     "soil-to-fertilizer",
-    //     "fertilizer-to-water",
-    //     "water-to-light",
-    //     "light-to-temperature",
-    //     "temperature-to-humidity",
-    //     "humidity-to-location",
-    // ];
-
     let now = Instant::now();
     // look up each of the seeds (values) -> find its location number -> min() is result!
     let mut results: Vec<i64> = Vec::from([]);
@@ -132,7 +120,6 @@ fn main() {
             // check to which number it has been converted:
             // println!("{:?}", &block);
             // println!("next num: {}", &next_num);
-            // set next_num = block[]
         }
 
         // this seed is finished - collect its location:
