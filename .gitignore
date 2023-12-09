@@ -1,0 +1,9 @@
+puzzle_inputs
+dayXX.rs
+read_*.rs
+
+# Ignore all
+day*/*
+
+# Unignore all with extensions .rs
+!day*/*.rs
