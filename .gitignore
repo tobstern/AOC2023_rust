@@ -4,7 +4,9 @@ read_*.rs
 
 # Ignore all
 day*/*
-day*/*_fail*
+
+# ignore garbage folder (failed code)
+garbage
 
 
 # Unignore all with extensions .rs
