@@ -44,7 +44,7 @@ fn check_adj(
             continue;
         }
 
-        let neigh: &char = scheme.get(&(i + m, j + n)).unwrap();
+        let neigh: &char = scheme.get(&(i + m, j + n)).unwrap_or_else(|| &'.');
 
         println!("neigh: '{}' at pos: {:?}", neigh, &(i + m, j + n));
         if (neigh != &'.') & !neigh.is_numeric() {
@@ -78,6 +78,11 @@ fn main() {
     for i in 0..(max_i as usize) {
         // let mut temp: Vec<String> = Vec::new();
         for j in 0..(max_j as usize) {
+            if line_vec[i].chars().nth(j).is_none() {
+                break;
+            }
+
+            let element = line_vec[i].chars().nth(j).unwrap_or_else(|| '.');
             //
             // println!(
             //     "row: {}, (cols, chars): {:?}",
@@ -86,7 +91,7 @@ fn main() {
             // );
 
             // save position, cols.split() in HasMap:
-            schematic.insert((i as i32, j as i32), line_vec[i].chars().nth(j).unwrap());
+            schematic.insert((i as i32, j as i32), element);
         }
     }
 
@@ -115,7 +120,7 @@ fn main() {
         for j in 0..(max_j as usize) {
             //
             // println!("{:?}", schematic.get(&(i, j)).unwrap() == &'.');
-            let ch: &char = schematic.get(&(i as i32, j as i32)).unwrap();
+            let ch: &char = schematic.get(&(i as i32, j as i32)).unwrap_or_else(|| &'.');
 
             // check if next char is numeric:
             if ch.is_numeric() {
