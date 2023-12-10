@@ -4,6 +4,8 @@ read_*.rs
 
 # Ignore all
 day*/*
+day*/*_fail*
+
 
 # Unignore all with extensions .rs
 !day*/*.rs
