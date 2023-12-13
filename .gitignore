@@ -11,3 +11,10 @@ garbage
 
 # Unignore all with extensions .rs
 !day*/*.rs
+
+# in these days I used cargo with extern crates
+!day07/day07_cargo/src/
+!day07/day07_cargo/Cargo.toml
+
+!day07/day07_p2/src/
+!day07/day07_p2/Cargo.toml
