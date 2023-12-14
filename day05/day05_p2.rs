@@ -14,21 +14,21 @@ pub fn read_txt(day: String) -> String {
     return text;
 }
 
-fn shift_range(range: &Vec<i64>, offset: &i64) -> Vec<i64> {
+fn shift_range(range: Vec<i64>, offset: &i64) -> Vec<i64> {
     // shifts the given range by offset, and gives it back
 
     // map the start:
-    let mut next_range: Vec<i64> = Vec::from([]);
+    let mut next_rng: Vec<i64> = Vec::from([]);
 
     // shift start of destinat by delta -> new start
-    next_range.push(&range[2] + offset);
+    next_rng.push(&range[0] + offset);
 
     // shift destination end by delta -> new end
-    next_range.push(&range[3] + offset);
+    next_rng.push(&range[1] + offset);
 
-    // println!("return next_range {:?}", &next_range);
+    // println!("return curr_seed {:?}", &curr_seed);
 
-    return next_range;
+    next_rng
 }
 
 fn main() {
@@ -116,7 +116,7 @@ fn main() {
     for seed in seeds {
         // saved as [destination, source, range]
         // loop through all map blocks
-        let mut next_range: Vec<i64> = seed.iter().cloned().collect(); //.iter().map(|x| *x).cloned().collect();
+        let mut curr_seed: Vec<i64> = seed.iter().cloned().collect(); //.iter().map(|x| *x).cloned().collect();
 
         // print seed number:
         // println!();
@@ -124,15 +124,14 @@ fn main() {
 
         // let mut next_seeds: Vec<Vec<i64>> = vec![vec![]]; //.iter().map(|x| *x).cloned().collect();
         let mut next_seeds: Vec<Vec<i64>> = Vec::from(Vec::from([])); //.iter().map(|x| *x).cloned().collect();
-        let mut ranges_state: Vec<Vec<i64>> = Vec::from(Vec::from([]));
-        ranges_state.push(next_range);
+        let mut ranges_with_mapping: Vec<Vec<i64>> = Vec::from(Vec::from([]));
 
         for block in &map {
             let mut checked_complete: bool = false;
             // loop through all connection blocks:
 
-            let mut next_seeds: Vec<Vec<i64>> = Vec::from(Vec::from([]));
-            let mut next_range: Vec<Vec<i64>> = Vec::from(Vec::from([]));
+            // let mut next_seeds: Vec<Vec<i64>> = Vec::from(Vec::from([]));
+            // let mut curr_seed: Vec<Vec<i64>> = Vec::from(Vec::from([]));
 
             for range in block {
                 println!("curr range of block line {:?}", &range);
@@ -141,65 +140,31 @@ fn main() {
                     continue;
                 }
 
-                // initially there is just one -> then can be split into more!
                 // loop through each range mapping:
-
                 // process every range -> compare to limits:
 
-                // for shift_range function:
+                // check each curr_rng if overlapping:
+                let curr_rng: Vec<i64> = curr_seed;
+                println!("curr_rng {:?}", &curr_rng);
+                println!("and the ranges_state after pop {:?}", &ranges_state);
 
-                while ranges_state.len() > 0 {
-                    // check each seed range in range:state against map_range:
-                    let curr_seed_rng: Vec<i64> = ranges_state.pop().unwrap();
-                    println!("curr_seed_rng {:?}", &curr_seed_rng);
-                    println!("and the ranges_state after pop {:?}", &ranges_state);
+                // completely ?
 
-                    // completely
-                    if (curr_seed_rng[0] >= range[0]) & (curr_seed_rng[1] <= range[1]) {
-                        let offset = curr_seed_rng[0] - range[0] - 1; // + 1 ?
-                                                                      // the mapping is different than direct!
-                        next_seeds.push(shift_range(range, &offset));
+                if (curr_rng[0] <= range[1]) && (curr_rng[1] >= range[0]) {
+                    // any overlap
 
-                        // now next_range is overwritten and can be given to next block (filter/mapping)
-
-                        // if found one break off
-                        checked_complete = true;
-                        break;
-                    } else if (curr_seed_rng[0] < range[0]) & (curr_seed_rng[1] >= range[0]) {
-                        let offset = 0; // range[1] - &curr_seed_rng[1]; // + 1 ?
-                                        // partial left
-                        next_seeds.push(vec![curr_seed_rng[0], &range[0] - 1]);
-                        next_seeds.push(shift_range(range, &offset));
-                    } else if (curr_seed_rng[0] <= range[1]) & (curr_seed_rng[1] > range[1]) {
-                        let offset = 0; // &curr_seed_rng[0] - &range[0]; // + 1 ?
-                                        // partial right
-                        next_seeds.push(vec![&range[1] + 1, curr_seed_rng[1]]);
-                        next_seeds.push(shift_range(range, &offset));
-                    } else {
-                        // none of ranges match:
-                        next_seeds.push(vec![curr_seed_rng[0], curr_seed_rng[1]]);
-                    }
-
-                    println!("next_seeds {:?}", &next_seeds);
-                    // out of range -> map directly: means it stays the same!
-                    if checked_complete {
-                        //continue; //break; // break whole block!
-                        break;
-                    }
+                    ranges_with_mapping.push(vec![
+                        (curr_rng[0], curr_rng[1]),
+                        (range[0], range[1], range[2], range[3]),
+                    ]);
                 }
-            }
-            // one block through -> overwrite ranges_state
-            ranges_state = next_seeds
-                .iter()
-                .cloned()
-                //.inspect(|x| println!("{:?}", x))
-                .collect();
 
-            // and clear next_seeds:
-            next_seeds = Vec::from(Vec::from([]));
+                println!("next_seeds {:?}", &next_seeds);
+                // out of range -> map directly: means it stays the same!
+            }
 
             // println!("{:?}", &block);
-            // println!("next num: {}", &next_range);
+            // println!("next num: {}", &curr_seed);
         }
 
         // this seed is finished - collect its range:
@@ -238,5 +203,6 @@ fn main() {
 }
 
 // 2410909864 too high,
+//  289863851 not right
 //
 //    4064810 too low ,
