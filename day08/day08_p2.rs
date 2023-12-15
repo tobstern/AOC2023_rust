@@ -13,6 +13,11 @@ pub fn read_txt(day: String) -> String {
     return text;
 }
 
+struct Periods {
+    count: usize,
+    is_period: bool,
+}
+
 fn main() {
     let day = String::from("08");
     // let day = String::from("08_test3");
@@ -34,8 +39,12 @@ fn main() {
         // second is HasMap
         if i == 1 {
             for line in block.lines() {
-                let Some((key, val_str)) = line.split_once(" = ") else {continue;};
-                let Some((left_temp, right_temp)) = val_str.trim().split_once(", ") else {continue;};
+                let Some((key, val_str)) = line.split_once(" = ") else {
+                    continue;
+                };
+                let Some((left_temp, right_temp)) = val_str.trim().split_once(", ") else {
+                    continue;
+                };
                 let left = left_temp.split_once("(").unwrap().1;
                 let right = right_temp.split_once(")").unwrap().0;
                 // println!("key, val {}, val {}", &key, &val);
@@ -73,10 +82,49 @@ fn main() {
     // loop through all starting nodes, simultaneously,
     // stop when all next nodes are ending with 'Z'
 
+    // consider using periodicity -> collect until period has been seen for 2 cycles for every starting node
+    // then find smalles common divisor of its len each!
+    let mut periods_check: Vec<Vec<String>> = Vec::from(Vec::from([]));
+    let mut periods_counts: Vec<_> = Vec::from([]);
+
+    // insert all starting nodes in separate Vecs
+    for node in &curr_nodes {
+        periods_check.push(vec![node.to_string()]);
+        periods_counts.push(Periods {
+            count: 0,
+            is_period: false,
+        });
+    }
+
     while !curr_nodes
         .iter()
         .all(|x| x.chars().collect::<Vec<_>>()[2] == 'Z')
     {
+        // insert all new nodes - to each
+        for (pos, node) in curr_nodes.iter().cloned().enumerate() {
+            periods_check[pos].push(node.to_string());
+        }
+
+        // check for periods:
+        // let period: usize = 0;
+        for (idx, nodes_vec) in periods_check.iter().enumerate() {
+            let period = nodes_vec.len() / 2 as usize;
+            let temp_cmp: Vec<_> = nodes_vec[0..period].to_vec();
+            // compare each element with next half of nodes_vec
+            let is_period: bool = nodes_vec[(period + 1)..]
+                .iter()
+                .enumerate()
+                .all(|(i, x)| x == &temp_cmp[i]);
+
+            if is_period && !periods_counts[idx].is_period {
+                // set the period count if it not has been set already
+                periods_counts[idx].count = period;
+                periods_counts[idx].is_period = true;
+            }
+        }
+
+        // if all periods found: find gcd!
+
         // get curr instruction - cyclic repetition
         let curr_instr = instr[count % instr.len()];
 
