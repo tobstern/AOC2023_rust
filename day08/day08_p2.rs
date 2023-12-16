@@ -13,6 +13,34 @@ pub fn read_txt(day: String) -> String {
     return text;
 }
 
+fn gcd(a: i64, b: i64) -> i64 {
+    // Function to return gcd of a and b
+    // sort a and b
+    // let mut c = a;
+    // if a < b {
+    //     // swap order
+    //     a = b;
+    //     b = c;
+    // }
+
+    if a == 0 {
+        return b;
+    }
+    // println!("gcd of {:?} is: {}", &(a, b), &gcd(b, a % b));
+    return gcd(b % a, a);
+}
+
+fn lcm(a: i64, b: i64) -> i64 {
+    // least common multiple
+    println!(
+        "lcm of {:?} is: {}",
+        &(a, b),
+        (a.abs() * b.abs() / gcd(a, b)) as i64
+    );
+    return ((a.abs() / gcd(a, b)) as i64) * b.abs();
+}
+
+#[derive(Debug)]
 struct Periods {
     count: usize,
     is_period: bool,
@@ -54,8 +82,8 @@ fn main() {
         }
     }
     // check parsed data:
-    println!("instr: {:?}", &instr);
-    println!("map: {:?}", &map);
+    // println!("instr: {:?}", &instr);
+    // println!("map: {:?}", &map);
     // parsed successfully.
 
     // start timer
@@ -70,7 +98,7 @@ fn main() {
     // let mut curr_instr: char = 'X';
     // find all starting nodes: "XXA"
     for node in map.keys() {
-        println!("node {:?}", &node);
+        // println!("node {:?}", &node);
         if node.chars().collect::<Vec<_>>()[2] == 'A' {
             // it is a starting node
             curr_nodes.push(node);
@@ -80,51 +108,25 @@ fn main() {
     println!("curr/starting_nodes {:?}", &curr_nodes);
 
     // loop through all starting nodes, simultaneously,
-    // stop when all next nodes are ending with 'Z'
+    // save count when next node is ending with 'Z'
 
-    // consider using periodicity -> collect until period has been seen for 2 cycles for every starting node
-    // then find smalles common divisor of its len each!
-    let mut periods_check: Vec<Vec<String>> = Vec::from(Vec::from([]));
+    // consider using periodicity -> found cycle when detecting the 'Z'
+    // then find smallest common multiple of its len each!
     let mut periods_counts: Vec<_> = Vec::from([]);
 
     // insert all starting nodes in separate Vecs
-    for node in &curr_nodes {
-        periods_check.push(vec![node.to_string()]);
+    for _node in &curr_nodes {
+        // periods_check.push(vec![]);
+        // periods_check.push(vec![node.to_string()]);
         periods_counts.push(Periods {
             count: 0,
             is_period: false,
         });
     }
 
-    while !curr_nodes
-        .iter()
-        .all(|x| x.chars().collect::<Vec<_>>()[2] == 'Z')
-    {
-        // insert all new nodes - to each
-        for (pos, node) in curr_nodes.iter().cloned().enumerate() {
-            periods_check[pos].push(node.to_string());
-        }
-
-        // check for periods:
-        // let period: usize = 0;
-        for (idx, nodes_vec) in periods_check.iter().enumerate() {
-            let period = nodes_vec.len() / 2 as usize;
-            let temp_cmp: Vec<_> = nodes_vec[0..period].to_vec();
-            // compare each element with next half of nodes_vec
-            let is_period: bool = nodes_vec[(period + 1)..]
-                .iter()
-                .enumerate()
-                .all(|(i, x)| x == &temp_cmp[i]);
-
-            if is_period && !periods_counts[idx].is_period {
-                // set the period count if it not has been set already
-                periods_counts[idx].count = period;
-                periods_counts[idx].is_period = true;
-            }
-        }
-
-        // if all periods found: find gcd!
-
+    let mut all_lcms: Vec<_> = Vec::from([]);
+    let mut found_lcm: bool = false;
+    loop {
         // get curr instruction - cyclic repetition
         let curr_instr = instr[count % instr.len()];
 
@@ -144,13 +146,80 @@ fn main() {
         }
 
         curr_nodes = next_nodes;
-        count += 1;
+
+        // found next string -> go check periods:
+
+        // check for periods/ for the 'Z':
+        // let period: usize = 0;
+        for (idx, node) in curr_nodes.iter().enumerate() {
+            if !periods_counts[idx].is_period {
+                // compare each element with next half of nodes_vec
+                let is_period: bool = node.chars().collect::<Vec<_>>()[2] == 'Z';
+
+                if is_period {
+                    // set the period count if it not has been set already
+                    periods_counts[idx].count = count + 1;
+                    periods_counts[idx].is_period = true;
+
+                    // panic!("Found a period {:?}", &periods_counts[idx]);
+                }
+            }
+        }
+
+        // if all periods found: find gcd!
+        let all_found: bool = periods_counts.iter().all(|x| x.is_period == true);
+        // println!(
+        //     "periods count {:?}, all_found? {}",
+        //     &periods_counts, &all_found
+        // );
+
+        if all_found {
+            // calculate gcd and then lcm, then break of while loop
+            // then, result = all_periods_counts.iter().map(|x| x.count).sum()
+            let mut periods: Vec<i64> = periods_counts.iter().map(|x| x.count as i64).collect();
+
+            println!("all found with counts of: {:?}", &periods);
+            let mut res: i64 = periods.pop().unwrap();
+            let mut res2: i64 = res;
+            for ele in &periods {
+                // apply lcm for each result and ele
+                res = lcm(res, *ele);
+                res2 = gcd(res2, *ele);
+            }
+            all_lcms.push(res);
+            // all_lcms.push(periods.iter().product());
+            println!("all lcms: {:?}", &all_lcms);
+            println!("gcd: {:?}", &res2);
+
+            found_lcm = true;
+        }
+
+        if found_lcm {
+            break;
+        }
+
         // println!("curr_nodes {:?}", &curr_nodes);
+        count += 1;
+        // println!("round: {}", count);
     }
+
+    println!("Found lcm: {:?}", all_lcms);
 
     // record timer
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed);
 
-    println!("\nThe result is: {:?}", count);
+    println!("\nThe result is: {:?}", all_lcms[0]);
 }
+
+// 249441 too low,
+// 1051297
+// 7049325738 too low,
+// 513241320606 -> correct?
+// 976806189684 not right,
+// 13830919117339 -> correct!
+// 947443477838676 not right,
+// 473721738919338 not right,
+// 473721738919338
+// 947443477838676 too high
+// 1879525818909237320640
