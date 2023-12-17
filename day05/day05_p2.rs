@@ -14,26 +14,9 @@ pub fn read_txt(day: String) -> String {
     return text;
 }
 
-fn shift_range(range: Vec<i64>, offset: &i64) -> Vec<i64> {
-    // shifts the given range by offset, and gives it back
-
-    // map the start:
-    let mut next_rng: Vec<i64> = Vec::from([]);
-
-    // shift start of destinat by delta -> new start
-    next_rng.push(&range[0] + offset);
-
-    // shift destination end by delta -> new end
-    next_rng.push(&range[1] + offset);
-
-    // println!("return curr_seed {:?}", &curr_seed);
-
-    next_rng
-}
-
 fn main() {
-    // let day = String::from("05");
-    let day = String::from("05_test");
+    let day = String::from("05");
+    // let day = String::from("05_test");
 
     // read in the text-file
     let txt: String = read_txt(day);
@@ -49,6 +32,8 @@ fn main() {
             lines
                 .clone()
                 .split("\n")
+                // .inspect(|x| println!("inspect {:?}", &x))
+                .skip_while(|x| x.contains("map:"))
                 .map(|x: &str| {
                     x.split(" ")
                         .filter_map(|s| s.parse::<i64>().ok())
@@ -66,116 +51,125 @@ fn main() {
 
     let seeds_raw: Vec<_> = map[0][0].iter().copied().collect();
 
-    // switch to ranges: convert to: [dest, src, range] -> [src_start, src_end, dest_start, dest_end]
-    let mut seeds: Vec<Vec<i64>> = Vec::from(Vec::from([]));
+    // switch to ranges: convert to: [dest, src, range] -> [src_start, src_len, dest_start, dest_len]
+    // stay with range_start, range_length -> as otherwise it will loose the length after matching...
+    let mut seeds: Vec<Vec<i64>> = Vec::new();
     for (i, ele) in seeds_raw.iter().enumerate() {
-        // make ranges, so convert: [seed_start, range] -> [seed_start, seed_end]
-        // remark: ranges are including end!
+        // make ranges, so convert: [seed_start, range] -> [seed_start, seed_len]
+        // remark: ranges are including len!
 
         if i % 2 == 0 {
-            seeds.push(vec![*ele, (ele + seeds_raw[i + 1])]);
+            seeds.push(vec![*ele, seeds_raw[i + 1]]);
         }
     }
 
-    let mut map: Vec<_> = map[1..(map.len())]
-        .into_iter()
-        .map(|x| x.into_iter().cloned().collect::<Vec<_>>())
-        .collect();
+    let mut map: Vec<_> = map[1..(map.len())].to_vec().clone();
 
-    // change to ranges:
-    let map_iter: Vec<Vec<_>> = map.iter().cloned().collect();
+    // stay with range_start, range_length:
+    let mut is_substraction: Vec<Vec<bool>> = Vec::new();
+    let map_iter: Vec<Vec<_>> = map.clone();
     for (i, block) in map_iter.iter().enumerate() {
+        let mut temp_bools: Vec<bool> = Vec::new();
         for (j, line) in block.iter().enumerate() {
-            if &map_iter[i][j].len() < &1 {
+            // println!("curr_line {:?}", &line);
+            if &block.len() < &1 || &line.len() < &1 {
                 continue;
             }
-            // make ranges, so convert: [dest, src, range] -> [src_start, src_end, dest_start, dest_end]
-            // remark: ranges are including end!
-            map[i][j] = vec![
-                line[1],
-                line[1] + line[2] - 1,
-                line[0],
-                line[0] + line[2] - 1,
-            ];
+
+            // save order of source and destination
+            temp_bools.push(line[0] < line[1]);
+            // make ranges, so convert: [dest, src, range] -> [src_start, src_len, dest_start, dest_len]
+            // remark: ranges are including len!
+            map[i][j] = vec![line[1], line[2], line[0], line[2]];
         }
+
+        is_substraction.push(temp_bools);
     }
 
-    // seeds = all_seeds.iter().flatten().map(|x| *x).collect::<Vec<i64>>();
-    println!("seeds: {:?}", &seeds);
+    // println!("substraction order check {:?}", &is_substraction);
+    // println!("seeds: {:?}", &seeds);
 
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed);
     println!("seeds {:?}", seeds);
-    println!("blocks {:?}", &map);
+    // println!("blocks {:?}", &map);
 
     let now = Instant::now();
     // look up each of the seeds (values) -> find its location number -> min() is result!
-    // let mut results: Vec<Vec<i64>> = vec![vec![]];
-    let mut results: Vec<Vec<i64>> = Vec::from(Vec::from([]));
 
-    for seed in seeds {
-        // saved as [destination, source, range]
-        // loop through all map blocks
-        let mut curr_seed: Vec<i64> = seed.iter().cloned().collect(); //.iter().map(|x| *x).cloned().collect();
+    for (block_num, block) in map.iter().enumerate() {
+        // write mapped ranges to next seed ranges that need to be mapped
+        let mut ranges_with_mapping: Vec<Vec<i64>> = Vec::new();
+        for seed in seeds {
+            // saved as [destination, source, range]
+            // loop through all map blocks
 
-        // print seed number:
-        // println!();
-        println!("Current seed range: {:?}", &seed);
+            // println!("Current seed range: {:?}", &seed);
 
-        // let mut next_seeds: Vec<Vec<i64>> = vec![vec![]]; //.iter().map(|x| *x).cloned().collect();
-        let mut next_seeds: Vec<Vec<i64>> = Vec::from(Vec::from([])); //.iter().map(|x| *x).cloned().collect();
-        let mut ranges_with_mapping: Vec<Vec<i64>> = Vec::from(Vec::from([]));
+            let mut overlaps: Vec<Vec<i64>> = Vec::new();
 
-        for block in &map {
-            let mut checked_complete: bool = false;
-            // loop through all connection blocks:
-
-            // let mut next_seeds: Vec<Vec<i64>> = Vec::from(Vec::from([]));
-            // let mut curr_seed: Vec<Vec<i64>> = Vec::from(Vec::from([]));
-
-            for range in block {
-                println!("curr range of block line {:?}", &range);
-                // skip the empty ones:
-                if range.len() < 1 {
-                    continue;
-                }
+            for (line_num, range) in block.iter().enumerate() {
+                // println!("curr range of block line {:?}", &range);
 
                 // loop through each range mapping:
                 // process every range -> compare to limits:
 
-                // check each curr_rng if overlapping:
-                let curr_rng: Vec<i64> = curr_seed;
-                println!("curr_rng {:?}", &curr_rng);
-                println!("and the ranges_state after pop {:?}", &ranges_state);
+                // check each seed if overlapping:
+                // let seed: Vec<i64> = seed.clone();
+                // println!("seed {:?}", &seed);
 
-                // completely ?
+                // any overlap?
+                if (seed[0] < range[0] + range[1]) && (seed[0] + seed[1] > range[0]) {
+                    let overlap_start = seed[0].max(range[0]);
+                    let overlap_len = (seed[0] + seed[1]).min(range[0] + range[1]) - overlap_start;
 
-                if (curr_rng[0] <= range[1]) && (curr_rng[1] >= range[0]) {
-                    // any overlap
+                    overlaps.push(vec![overlap_start, overlap_len]);
 
-                    ranges_with_mapping.push(vec![
-                        (curr_rng[0], curr_rng[1]),
-                        (range[0], range[1], range[2], range[3]),
-                    ]);
+                    // translate/map overlap to new_range
+                    // overlap can be left/right:
+                    // println!("block_number {}, line_number {}", &block_num, &line_num);
+                    let mapped_start = if is_substraction[block_num][line_num] {
+                        // shift left
+                        overlap_start - (range[0] - range[2]).abs()
+                    } else {
+                        // shift right
+                        overlap_start + (range[0] - range[2]).abs()
+                    };
+
+                    let next_mapped_rng = vec![mapped_start, overlap_len];
+                    // println!("In overlap: next mapped range {:?}", &next_mapped_rng);
+
+                    ranges_with_mapping.push(next_mapped_rng);
                 }
 
-                println!("next_seeds {:?}", &next_seeds);
                 // out of range -> map directly: means it stays the same!
+            }
+
+            // map unmatched ranges
+            // overlaps.sort_by_key(|x| x[0]);
+            overlaps.sort();
+
+            // find each range that has not been matched yet -> no change, just save it
+            let mut unmapped_start = seed[0];
+
+            for ovlp_range in overlaps {
+                if unmapped_start < ovlp_range[0] {
+                    // unmapped_start is indeed the start
+                    ranges_with_mapping.push(vec![unmapped_start, ovlp_range[0] - unmapped_start]);
+                }
+                unmapped_start = ovlp_range[0] + ovlp_range[1];
+            }
+
+            if unmapped_start < (seed[0] + seed[1]) {
+                ranges_with_mapping.push(vec![unmapped_start, seed[0] + seed[1] - unmapped_start]);
             }
 
             // println!("{:?}", &block);
             // println!("next num: {}", &curr_seed);
         }
+        // println!("overall: mapped ranges {:?}", &ranges_with_mapping);
 
-        // this seed is finished - collect its range:
-        results.push(
-            ranges_state
-                .iter()
-                .flatten()
-                .map(|x| *x)
-                .filter(|x| Some(x) != None)
-                .collect::<Vec<_>>(),
-        );
+        seeds = ranges_with_mapping;
     }
 
     let elapsed = now.elapsed();
@@ -189,17 +183,8 @@ fn main() {
 
     println!(
         "\nThe result is: {:?}",
-        results.sort() // .iter()
-                       // .flatten()
-                       // .filter(|x| *x != &vec![0, 0])
-                       //.collect::<Vec<_>>() // results[1].iter().min().unwrap()
-                       // results.iter().flatten().min().unwrap() // results[1].iter().min().unwrap()
+        seeds.iter().map(|range| range[0]).min().unwrap()
     );
-
-    // println!(
-    //     "\nThe result is: {:?}",
-    //     results.iter().map(|x| x[0]).min().unwrap()
-    // );
 }
 
 // 2410909864 too high,
