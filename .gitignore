@@ -1,3 +1,5 @@
+.vscode
+
 puzzle_inputs
 dayXX.rs
 read_*.rs
@@ -17,4 +19,8 @@ garbage
 !day*/day*/src/*
 
 day*/day*/target/
-day*/day*/trarget/*
+day*/day*/target/*
+
+# for rust-analyzer
+target/
+Cargo.*
