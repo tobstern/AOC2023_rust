@@ -1,6 +1,7 @@
-use std::fs;
-use std::time::Instant;
 use std::collections::HashMap;
+use std::fs;
+use std::iter::repeat;
+use std::time::Instant;
 
 pub fn read_txt(day: String) -> String {
     // read in puzzle input: dayXX.txt
@@ -15,12 +16,11 @@ pub fn read_txt(day: String) -> String {
 
 fn fac(n: i128) -> i128 {
     if n == 1 {
-        return 1
+        return 1;
     }
 
     fac(n - 1) * n
 }
-
 
 fn transpose<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>>
 where
@@ -33,26 +33,34 @@ where
 }
 
 fn main() {
-    let day = String::from("11");
-    // let day = String::from("11_test");
+    // let day = String::from("11");
+    let day = String::from("11_test");
 
     // read in the text-file
     let txt: String = read_txt(day);
 
     // find epty space lines and columns
     let mut all_lines: Vec<Vec<char>> = txt.lines().map(|x| x.chars().collect()).collect();
-    let empty_lines: Vec<bool> = all_lines.iter().filter_map(|x| Some(!x.contains(&'#'))).collect::<Vec<_>>();
-    
+    let empty_lines: Vec<bool> = all_lines
+        .iter()
+        .filter_map(|x| Some(!x.contains(&'#')))
+        .collect::<Vec<_>>();
+
     // println!("transposed Vec<Vec> {:?}", &all_cols);
     // println!("empty lines {:?}", &empty_lines);
 
     // insert doublicates (for lines)
     for (i, empty) in empty_lines.iter().enumerate().rev() {
         if *empty {
-            let _ = all_lines.splice(i..i+1, vec![all_lines[i].clone(), all_lines[i].clone()]).collect::<Vec<_>>();
+            let _ = all_lines
+                .splice(
+                    i..i + 1,
+                    repeat(all_lines[i].clone()).take(2).collect::<Vec<_>>(),
+                )
+                .collect::<Vec<_>>();
         }
     }
-    
+
     // pretty print lines of vec
     // for line in &all_lines {
     //     println!("expanded lines {:?}", &line);
@@ -61,18 +69,26 @@ fn main() {
 
     // now the same for all columns:
     let mut all_cols: Vec<Vec<char>> = transpose(all_lines.clone());
-    let empty_cols: Vec<bool> = all_cols.iter().filter_map(|x| Some(!x.contains(&'#'))).collect::<Vec<_>>();
+    let empty_cols: Vec<bool> = all_cols
+        .iter()
+        .filter_map(|x| Some(!x.contains(&'#')))
+        .collect::<Vec<_>>();
     // println!("empty columns {:?}", &empty_cols);
 
     // insert doublicates (for 'lines' - transposed columns)
     for (i, empty) in empty_cols.iter().enumerate().rev() {
         if *empty {
-            let _ = all_cols.splice(i..i+1, vec![all_cols[i].clone(), all_cols[i].clone()]).collect::<Vec<_>>();
+            let _ = all_cols
+                .splice(
+                    i..i + 1,
+                    repeat(all_cols[i].clone()).take(2).collect::<Vec<_>>(),
+                )
+                .collect::<Vec<_>>();
         }
     }
     // these are correct -> now transpose again:
     all_lines = transpose(all_cols);
-    
+
     // pretty print lines of final expanded Vec:
     // for line in &all_lines {
     //     println!("expanded lines {:?}", &line);
@@ -83,8 +99,8 @@ fn main() {
 
     // parse it:
     let mut map: HashMap<(usize, usize), i32> = HashMap::new();
-    let mut galaxies : HashMap<i32, (usize, usize)> = HashMap::new();
-    let mut count: i32 =  0;
+    let mut galaxies: HashMap<i32, (usize, usize)> = HashMap::new();
+    let mut count: i32 = 0;
     for (i, line) in all_lines.iter().enumerate() {
         for (j, ch) in line.iter().enumerate() {
             // do expansion for all empty lines/columns - double them
@@ -103,7 +119,6 @@ fn main() {
                 // WTF: should not be anything else out here in space...
                 continue;
             }
-
         }
     }
 
@@ -119,18 +134,26 @@ fn main() {
 
     // println!("number of combinations {:?}, test fac {}", &combs, fac(3));
     // get each unique pair
-    let combinations : Vec<_> = galaxies.iter()
-        .map(|(g, _v)| galaxies.iter().map(move |(g2, _v2)| (g2.to_owned(), g.to_owned())))
+    let combinations: Vec<_> = galaxies
+        .iter()
+        .map(|(g, _v)| {
+            galaxies
+                .iter()
+                .map(move |(g2, _v2)| (g2.to_owned(), g.to_owned()))
+        })
         .flatten()
         .collect();
-    
-    // let combinations = combinations.iter().filter(|(left, right)| left != right).collect::<Vec<_>>();
+
+    let combinations = combinations
+        .iter()
+        .filter(|(left, right)| left != right)
+        .collect::<Vec<_>>();
 
     let mut uniques: Vec<(i32, i32)> = Vec::new();
     for ele in &combinations {
         if !&uniques.contains(ele) && !&uniques.contains(&(ele.1, ele.0)) {
             // it is unique -> append
-            uniques.push(*ele);
+            uniques.push(**ele);
         }
     }
 
@@ -141,15 +164,16 @@ fn main() {
     for (left, right) in uniques {
         // println!("{:?}", (&(i, j), &event));
         let pos1 = galaxies.get(&left).expect("Hä...no galaxy, on the left???");
-        let pos2 = galaxies.get(&right).expect("Hä...no galaxy, on the right???");
+        let pos2 = galaxies
+            .get(&right)
+            .expect("Hä...no galaxy, on the right???");
 
         // let distance = ((pos2.0 as i32 - pos1.0 as i32 + 1).pow(2) as f32 + (pos2.1 as i32 - pos1.1 as i32 + 1).pow(2) as f32).sqrt();
-        let distance = (pos1.0 as i32 - pos2.0 as i32).abs() + (pos1.1 as i32 - pos2.1 as i32).abs();
+        let distance =
+            (pos1.0 as i32 - pos2.0 as i32).abs() + (pos1.1 as i32 - pos2.1 as i32).abs();
         // println!("current distance {}, for {} to {}", &distance, &left, &right);
 
         sum += distance;
-
-
     }
 
     // record timer
