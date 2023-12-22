@@ -24,7 +24,7 @@ puzzle_inputs
 
 # Ignore all dayXX.rs
 src/dayXX.rs
-src/session_cookie.txt
+session_cookie.txt
 src/*.rs_*
 
 # Ignore Rust's build folder
