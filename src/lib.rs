@@ -11,6 +11,7 @@ use std::path::Path;
 /// The `read_txt` function takes a `String` representing the day and returns
 /// the puzzle input as a `String`.
 ///
+#[allow(unused)]
 pub fn read_txt(day: String) -> String {
     // read in the test-file if it exists
     let is_test: bool = day.ends_with("_test");

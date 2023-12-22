@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::iter::repeat;
 use std::time::Instant;
 
+#[allow(unused)]
 pub fn fac(n: i128) -> i128 {
     if n == 1 {
         return 1;

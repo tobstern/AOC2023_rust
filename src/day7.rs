@@ -46,6 +46,7 @@ fn map_char(c: char) -> char {
     new
 }
 
+#[allow(unused)]
 fn convert_to_alpha(string: &str) -> String {
     // map c to new alphabet char
     let mut c_vec: Vec<char> = Vec::from([]);
@@ -57,6 +58,7 @@ fn convert_to_alpha(string: &str) -> String {
     c_vec.iter().join("")
 }
 
+#[allow(unused)]
 pub fn map_char_p2(c: char) -> char {
     // J is weakest for part 2!
     let new: char = match c {
@@ -78,6 +80,7 @@ pub fn map_char_p2(c: char) -> char {
     new
 }
 
+#[allow(unused)]
 pub fn convert_to_alpha_p2(string: &str) -> String {
     // map c to new alphabet char
     let mut c_vec: Vec<char> = Vec::from([]);
@@ -89,6 +92,7 @@ pub fn convert_to_alpha_p2(string: &str) -> String {
     c_vec.iter().join("")
 }
 
+#[allow(unused)]
 pub fn part1(input: String) {
     let lines = input.split("\n");
 
@@ -122,7 +126,7 @@ pub fn part1(input: String) {
 
     for hand in hands.iter().cloned() {
         // save each hand in a Counter
-        let mut hand_counter = hand.chars().collect::<Counter<_>>();
+        let hand_counter = hand.chars().collect::<Counter<_>>();
 
         // order the Counter, to get most common/ max
         // most_commons = hand_counter.most_common_ordered();
@@ -134,7 +138,7 @@ pub fn part1(input: String) {
 
     // Primary check - first ranking:
     let mut ranks: Vec<(i32, i32)> = Vec::from([]);
-    let mut types_sorted: Vec<Vec<(char, i32)>> = Vec::from([]);
+    let _types_sorted: Vec<Vec<(char, i32)>> = Vec::from([]);
     for (pos, ty) in types.iter().cloned().enumerate() {
         // match type:
         if ty[0].1 == 5 {
@@ -171,7 +175,7 @@ pub fn part1(input: String) {
     let mut new_hands: Vec<_> = Vec::from([]);
     let mut new_bids: Vec<_> = Vec::from([]);
     let mut new_types: Vec<Vec<_>> = Vec::from(Vec::from([]));
-    for (new_pos, (pos, rank)) in ranks.clone().iter().enumerate() {
+    for (new_pos, (pos, _rank)) in ranks.clone().iter().enumerate() {
         // apply new order
         new_bids.push(bids[*pos as usize]);
         new_hands.push((convert_to_alpha(hands[*pos as usize]), new_pos));
@@ -187,7 +191,7 @@ pub fn part1(input: String) {
 
     // Secondary ordering - by 'picture'=23456789TJQKA:
     let ranks_counter = ranks.iter().cloned().map(|x| x.1).collect::<Counter<_>>();
-    let mut final_ranks: Vec<(i32, i32)> = Vec::from([]);
+    let _final_ranks: Vec<(i32, i32)> = Vec::from([]);
 
     let mut pos: usize = 0;
     let mut occ: usize = 0;
@@ -226,7 +230,7 @@ pub fn part1(input: String) {
                 &final_bids, &prev_pos, &pos
             );
 
-            for (new_pos, (hand, old_pos)) in to_cmp_hands.clone().iter().enumerate() {
+            for (_new_pos, (_hand, old_pos)) in to_cmp_hands.clone().iter().enumerate() {
                 // apply new order
                 final_bids.push(vec![&new_bids[*old_pos as usize]]);
             }
@@ -273,6 +277,7 @@ pub fn part1(input: String) {
     );
 }
 
+#[allow(unused)]
 pub fn part2(input: String) {
     let lines = input.split("\n");
 
@@ -318,10 +323,10 @@ pub fn part2(input: String) {
     // Primary check - first ranking:
     // now consider having J as Joker -> to get highest possible type!
     let mut ranks: Vec<(i32, i32)> = Vec::from([]);
-    let mut types_sorted: Vec<Vec<(char, i32)>> = Vec::from([]);
+    let _types_sorted: Vec<Vec<(char, i32)>> = Vec::from([]);
     for (pos, mut ty) in types.iter().cloned().enumerate() {
         let mut occs: usize = ty[0].1;
-        let mut next: usize = 1;
+        let next: usize = 1;
 
         // match type:
         // check if most common is a J:
@@ -373,7 +378,7 @@ pub fn part2(input: String) {
     ranks.sort_by_key(|k| k.1);
     let mut new_hands: Vec<_> = Vec::from([]);
     let mut new_bids: Vec<_> = Vec::from([]);
-    for (new_pos, (pos, rank)) in ranks.clone().iter().enumerate() {
+    for (new_pos, (pos, _rank)) in ranks.clone().iter().enumerate() {
         // apply new order
         new_bids.push(bids[*pos as usize]);
         new_hands.push((convert_to_alpha_p2(hands[*pos as usize]), new_pos));
@@ -385,7 +390,7 @@ pub fn part2(input: String) {
 
     // Secondary ordering - by 'picture'=23456789TJQKA:
     let ranks_counter = ranks.iter().cloned().map(|x| x.1).collect::<Counter<_>>();
-    let mut final_ranks: Vec<(i32, i32)> = Vec::from([]);
+    let _final_ranks: Vec<(i32, i32)> = Vec::from([]);
 
     let mut pos: usize = 0;
     let mut occ: usize = 0;
@@ -416,7 +421,7 @@ pub fn part2(input: String) {
                 &final_bids, &prev_pos, &pos
             );
 
-            for (new_pos, (hand, old_pos)) in to_cmp_hands.clone().iter().enumerate() {
+            for (_new_pos, (_hand, old_pos)) in to_cmp_hands.clone().iter().enumerate() {
                 // apply new order
                 final_bids.push(vec![&new_bids[*old_pos as usize]]);
             }

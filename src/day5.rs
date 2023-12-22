@@ -1,17 +1,16 @@
 use std::time::Instant;
 
 pub fn part1(input: String) {
-    let now = Instant::now(); // mark time
+    let _now = Instant::now(); // mark time
     let blocks = input.split("\n\n");
 
     let mut map: Vec<Vec<_>> = Vec::new();
 
     // cut blocks @\n
-    for lines in blocks.collect::<Vec<_>>().iter() {
+    for lines in blocks.collect::<Vec<_>>().into_iter() {
         // split each and save them into block_line_vec
         map.push(
             lines
-                .clone()
                 .split("\n")
                 .map(|x: &str| {
                     x.split(" ")
@@ -122,11 +121,10 @@ pub fn part2(input: String) {
     let mut map: Vec<Vec<_>> = Vec::new();
 
     // cut blocks @\n
-    for lines in blocks.collect::<Vec<_>>().iter() {
+    for lines in blocks.collect::<Vec<_>>().into_iter() {
         // split each and save them into block_line_vec
         map.push(
             lines
-                .clone()
                 .split("\n")
                 // .inspect(|x| println!("inspect {:?}", &x))
                 .skip_while(|x| x.contains("map:"))

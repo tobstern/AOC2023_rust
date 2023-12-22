@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[allow(unused)]
 pub fn check_adj_p1(
     (i, j): &(i32, i32),
     scheme: &HashMap<(i32, i32), char>,
@@ -89,6 +90,7 @@ pub fn check_adj_p2(
     return (cont, pos);
 }
 
+#[allow(unused)]
 pub fn part1(input: String) {
     let lines = input.split("\n");
 
@@ -130,7 +132,7 @@ pub fn part1(input: String) {
     // check if numeric - check adjacents (vector of directions?) -> if adjacents not contain (alltogether as String?) ".|0-9" -> append to whole_num_string -> check if digit is on right? -> sum the number!
     let mut sum: i32 = 0;
 
-    let mut curr_num: i32 = 0;
+    let _curr_num: i32 = 0;
 
     // whole nnumber string:
     let mut temp_num: String = "".to_string();
@@ -197,6 +199,7 @@ pub fn part1(input: String) {
     // println!("{}", '.'.is_numeric());
 }
 
+#[allow(unused)]
 pub fn part2(input: String) {
     let lines = input.split("\n");
 

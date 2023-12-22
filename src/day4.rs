@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[allow(unused)]
 pub fn merge(mut owner: HashMap<i32, i32>, dummy: HashMap<i32, i32>) -> HashMap<i32, i32> {
     // merges 2 HashMap together -> mutates the 1st:
     for (key, val) in dummy {
@@ -15,7 +16,13 @@ pub fn merge(mut owner: HashMap<i32, i32>, dummy: HashMap<i32, i32>) -> HashMap<
     owner
 }
 
-pub fn has_won(curr_wins: Vec<&str>, wins: Vec<Vec<&str>>, mine: Vec<Vec<&str>>, curr: i32) -> i32 {
+#[allow(unused)]
+pub fn has_won(
+    curr_wins: Vec<&str>,
+    _wins: Vec<Vec<&str>>,
+    mine: Vec<Vec<&str>>,
+    curr: i32,
+) -> i32 {
     // loop through count of inner vectors and check if the win numbers are in "whatihave"
     // loop through one set:
     let mut count: i32 = 0;
@@ -37,12 +44,13 @@ pub fn has_won(curr_wins: Vec<&str>, wins: Vec<Vec<&str>>, mine: Vec<Vec<&str>>,
     count
 }
 
+#[allow(unused)]
 pub fn part1(input: String) {
     let lines = input.split("\n");
 
     let line_vec: Vec<&str> = lines.collect();
 
-    let mut cards: Vec<Vec<String>> = vec![];
+    let _cards: Vec<Vec<String>> = vec![];
     let mut wins_str: Vec<Vec<&str>> = vec![];
     let mut whatihave_str: Vec<Vec<&str>> = vec![];
 
@@ -50,9 +58,8 @@ pub fn part1(input: String) {
     let mut sum: i32 = 0;
 
     // parse the input:
-    for l in &line_vec {
+    for l in line_vec {
         let temp = l
-            .clone()
             .split(": ")
             .map(|x: &str| {
                 x.split(" | ")
@@ -110,6 +117,7 @@ pub fn part1(input: String) {
     println!("The result is: {}", sum);
 }
 
+#[allow(unused)]
 pub fn part2(input: String) {
     let lines = input.split("\n");
 
@@ -119,9 +127,8 @@ pub fn part2(input: String) {
     let mut whatihave_str: Vec<Vec<&str>> = Vec::from([]);
 
     // parse the input:
-    for l in &line_vec {
+    for l in line_vec {
         let temp = l
-            .clone()
             .split(": ")
             .map(|x: &str| {
                 x.split(" | ")
@@ -185,7 +192,7 @@ pub fn part2(input: String) {
     let mut current_wins: i32 = 0;
     let mut queue: Vec<i32> = Vec::from([]);
 
-    for (i, curr_wins) in wins_str.iter().enumerate() {
+    for (i, _curr_wins) in wins_str.iter().enumerate() {
         // start counting from 1:
         ind = i + 1_usize; // current card
         let orig_card: i32 = ind as i32;

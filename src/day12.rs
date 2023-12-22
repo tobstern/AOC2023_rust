@@ -162,7 +162,7 @@ pub fn part1(input: String) {
     // println!("\nThe result is: {:?}", sum);
 }
 
-pub fn part2(input: String) {
+pub fn part2(_input: String) {
     //
     todo!("Part 2 not implemented yet.");
 }
