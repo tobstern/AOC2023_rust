@@ -11,7 +11,7 @@ The project is structured as a Rust Cargo project. Each day's puzzle is solved i
 To run the code for a specific day and part, use the `cargo run` command followed by the day and part number. For example, to run the solution for day 1, part 1, you would use the following command:
 
 ```bash
-cargo run 01 1
+cargo run -- 1 1
 ```
 
 ## Input Data
