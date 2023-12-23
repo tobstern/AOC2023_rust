@@ -34,6 +34,7 @@ pub struct Periods {
     is_period: bool,
 }
 
+#[allow(unused)]
 pub fn part1(input: String) {
     // as HashMap -> split @\n\n -> 1st is instr; 2nd is map
     // split map @\n then @' = ', then the pos1 @', '| read capital chars with regexp :)
@@ -100,6 +101,7 @@ pub fn part1(input: String) {
     println!("\nThe result is: {:?}", count);
 }
 
+#[allow(unused)]
 pub fn part2(input: String) {
     // as HashMap -> split @\n\n -> 1st is instr; 2nd is map
     // split map @\n then @' = ', then the pos1 @', '| read capital chars with regexp :)
