@@ -164,5 +164,77 @@ pub fn part1(input: String) {
 
 pub fn part2(_input: String) {
     //
-    todo!("Part 2 not implemented yet.");
+    // start timer
+    let now = Instant::now(); // mark time
+
+    // part 2: now each condition vec of all vecs needs to be 5 times itself, separated by '?'
+    // and the groups vecs need to be 5 times itself too
+
+    let mut conditions: Vec<Vec<char>> = Vec::new();
+    let mut groups: Vec<Vec<usize>> = Vec::new();
+    for line in input.lines() {
+        // println!("{}", line);
+        let mut parts = line.split(" ");
+        conditions.push(parts.next().unwrap().chars().collect::<Vec<char>>());
+        groups.push(
+            parts
+                .next()
+                .unwrap()
+                .split(",")
+                .map(|x| x.parse::<usize>().unwrap())
+                .collect::<Vec<usize>>(),
+        );
+    }
+    // println!("{:?}", conditions);
+    // println!("{:?}", groups);
+
+    // start timer
+    let now = Instant::now(); // mark time
+
+    // Find all possible combinations of the '#' groups
+    // Each '#' in the condition is a group of 1, when not having neighbours of '#'
+    // Each '?' can be replaced by either '#' or '.' and the groups can be combined
+    // Any of the three symbol types can only be combined with neighbours of the same symbol type, and it will be a new group
+    // The groups can only be combined in the order given in the groups list
+    // The group numbers in the groups list are the sizes of the groups, and they give the size of groups of '#' only, in conditions list
+
+    let mut count: usize = 0;
+    let mut valid_combinations: usize = 0;
+
+    for mut s_vec in conditions {
+        let combinations = generate_combinations(&mut s_vec, 0);
+        // println!("{:?}", combinations);
+        for combination in combinations {
+            let mut groups_vec: Vec<usize> = Vec::new();
+            let mut group_size: usize = 0;
+            for c in combination {
+                if c == '#' {
+                    group_size += 1;
+                } else if group_size > 0 {
+                    groups_vec.push(group_size);
+                    group_size = 0;
+                }
+            }
+            if group_size > 0 {
+                groups_vec.push(group_size);
+            }
+            // println!("{:?}", groups_vec);
+            if groups_vec == groups[count] {
+                valid_combinations += 1;
+                // println!("Found a match!");
+                // break;
+            }
+        }
+        count += 1;
+    }
+
+    println!("Total valid combinations: {}", valid_combinations);
+
+    // record timer
+    let elapsed = now.elapsed();
+    println!("Elapsed: {:.2?}", elapsed);
+
+    // record timer
+    let elapsed = now.elapsed();
+    println!("Elapsed: {:.2?}", elapsed);
 }

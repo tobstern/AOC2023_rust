@@ -14,10 +14,10 @@ use std::path::Path;
 #[allow(unused)]
 pub fn read_txt(day: String) -> String {
     // read in the test-file if it exists
-    let is_test: bool = day.ends_with("_test");
+    let is_test: bool = day.contains("_test");
     let mut filename: String = String::new();
     if is_test {
-        filename = format!("day{}_test.txt", day);
+        filename = format!("./puzzle_inputs/day{}.txt", day);
         if Path::new(&filename).exists() {
             return fs::read_to_string(filename)
                 .expect("Something went wrong reading the test file");

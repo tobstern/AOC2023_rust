@@ -32,13 +32,18 @@ fn main() {
         println!("Please provide the day and part as command line arguments. Example: cargo run -- day01 part1");
         return;
     }
-    let day = &args[1];
-    let part = &args[2];
+    let mut day: &str = &args[1];
+    let part: &str = &args[2];
 
     // provide the input to the day's function:
     // day can include "_test" to read the test input
     let input = read_txt(day.to_string());
-    match (day.as_str(), part.as_str()) {
+
+    if day.contains("test") {
+        day = day.split("_test").next().unwrap();
+        // println!("day is = {}", day);
+    }
+    match (day, part) {
         ("1", "1") => day1::part1(input),
         ("1", "2") => day1::part2(input),
         ("2", "1") => day2::part1(input),
@@ -63,7 +68,7 @@ fn main() {
         ("11", "2") => day11::part2(input),
         ("12", "1") => day12::part1(input),
         ("12", "2") => day12::part2(input),
-        _ => println!("Invalid day or part argument. Please provide a valid day such as 'day01' and a part such as '1'."),
+        _ => println!("Invalid day or part argument. Please provide a valid day such as '1' or '1_test[X]' and a part such as '1'."),
     }
 }
 // ("day13", "1") => day13::1(),
