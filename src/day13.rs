@@ -193,25 +193,20 @@ pub fn part1(input: String) {
     println!("\nPart1 result is: {:?}", sum);
 }
 
-pub fn check_for_smudge(lower: &String, upper: &String) -> bool {
+pub fn check_for_smudge(lower: &Vec<String>, upper: &Vec<String>) -> bool {
     // consider now the smudge:
     // if only one char is different, then it is valid
-    let smudges: Vec<usize> = lower
-        .chars()
-        .zip(upper.chars())
-        .enumerate()
-        .filter_map(|(i, (a, b))| {
-            if a != b {
-                // println!("smudge at position {:?}", &i);
-                Some(i)
-            } else {
-                None
+    let mut smudge_count = 0;
+    for (low, up) in lower.iter().zip(upper.iter()) {
+        for (low_char, up_char) in low.chars().zip(up.chars()) {
+            if low_char != up_char {
+                smudge_count += 1;
             }
-        })
-        .collect::<Vec<_>>();
+        }
+    }
 
     // now check if only one char is different
-    if smudges.len() == 1 {
+    if smudge_count == 1 {
         println!(
             "There is a smudge! for \nlower {:?} and \nupper {:?}",
             &lower, &upper
@@ -224,70 +219,28 @@ pub fn check_for_smudge(lower: &String, upper: &String) -> bool {
 
 // part 2:
 // Function to check for mirror positions in a vector of strings
-fn check_mirror_positions2(lines: &[String]) -> Vec<usize> {
-    let mut mirror_positions = Vec::new();
+fn find_mirror(lines: &Vec<String>) -> usize {
+    // loop through lines and crop lines above and under the mirror line
+    // to compare the lines, if they are equal,
+    // reverse the block with the lines that need to be cropped to have same line lengths
+    // it is a mirror only if all the lines of the comparism have exactly one smudge!
+    for r in 1..lines.len() {
+        let above: Vec<_> = lines[0..r].iter().cloned().rev().collect();
+        let under = lines[r..lines.len()].to_vec();
 
-    for (i, line) in lines.iter().enumerate() {
-        if mirror_positions.len() > 0 {
-            // if there is already a mirror position, then break
-            // only find 1st mirror pos?
-            //break;
-        }
-        if i + 1 >= lines.len() {
-            break;
-        }
-
-        if line == &lines[i + 1] {
-            mirror_positions.push(i + 1);
-        } else {
-            // consider now the smudge:
-            // if only one char is different, then it is valid
-            let is_smudge = check_for_smudge(&lines[i], &lines[i + 1]);
-
-            if is_smudge {
-                // is valid
-                mirror_positions.push(i + 1);
-            }
+        if check_for_smudge(&above, &under) {
+            println!("found mirror at position {:?}", &r);
+            return r;
         }
     }
 
-    mirror_positions
-}
-
-// for part2:
-// Function to check if a mirror position is valid in a vector of strings
-// mirrors can have a smudge, i.e. one line is not same as next line, but only 1 char is different
-fn valid_mirror_positions2(lines: &[String], mirror_position: usize) -> bool {
-    let mut smudge_count: usize = 0;
-    for i in 0..lines.len() {
-        println!("current posistion: {:?}", &i);
-
-        if mirror_position + i >= lines.len() || (mirror_position as i32) - (i as i32) - 1 < 0 {
-            // more than one smudge, so, it is invalid
-            // there is exactly one smudge per mirror!
-            println!("hit the end of the line, so invalid");
-            if smudge_count == 1 {
-                return true;
-            } else {
-                return false;
-            }
-            // return false;
-        }
-
-        let upper_str = &lines[mirror_position + i];
-        let lower_str = &lines[mirror_position - i - 1];
-
-        let is_smudge: bool = check_for_smudge(&lower_str, &upper_str);
-
-        if is_smudge {
-            // return true;
-            smudge_count += 1;
-        }
-    }
-    false
+    return 0;
 }
 
 #[allow(unused)]
+// major thanks to hyper-neutrino (https://github.com/hyper-neutrino/advent-of-code)!
+// I had a really strange/different approach for part 1, that did not work out for part 2...
+
 pub fn part2(input: String) {
     let blocks_lines: Vec<Vec<String>> = input
         .split("\n\n")
@@ -350,58 +303,8 @@ pub fn part2(input: String) {
 
         println!("\n\nNew block: {:?}", &c + &1);
 
-        let mut valid_mirrors: Vec<usize> = Vec::new();
-
-        // first loop over lines
-        let mut mirror_pos_line = check_mirror_positions2(&blocks_lines[c]);
-
-        let mut mirror_pos_col = check_mirror_positions2(&blocks_cols_str[c]);
-
-        // found mirror positions for this block
-        // it should be either in mirror_pos_line or mirror_pos_col!
-        println!("mirror_pos_line {:?}", &mirror_pos_line);
-        println!("mirror_pos_col {:?}", &mirror_pos_col);
-
-        // check if all but one lines are same, break immediatly if not
-        // valid mirror lines/cols for this block
-        let mut mirror_line: bool = false;
-        if mirror_pos_line.len() > 0 {
-            let mirr_pos: usize = mirror_pos_line[0];
-
-            // first lines
-            mirror_line = valid_mirror_positions2(&blocks_lines[c], mirr_pos);
-
-            if mirror_line {
-                // valid mirror position
-                sum += mirr_pos * 100;
-                // go to next block
-                c += 1;
-                continue 'blocks;
-            }
-            println!("mirror position {:?}, is valid={}", &mirr_pos, &mirror_line);
-        } else {
-            // no mirror in lines
-            println!("no mirror in lines");
-        }
-
-        if mirror_pos_col.len() > 0 {
-            let mirr_pos: usize = mirror_pos_col[0];
-
-            // only consider columns if temp of lines is empty
-            // then columns
-            let mirror_col: bool = valid_mirror_positions2(&blocks_cols_str[c], mirr_pos);
-
-            if mirror_col {
-                sum += mirr_pos;
-                // go to next block
-                c += 1;
-                continue 'blocks;
-            }
-            println!("mirror position {:?}, is valid={}", &mirr_pos, &mirror_col);
-        } else {
-            // no mirror in lines
-            println!("no mirror in columns");
-        }
+        sum += find_mirror(&blocks_lines[c]) * 100;
+        sum += find_mirror(&blocks_cols_str[c]);
 
         // go to next block
         c += 1;
@@ -413,9 +316,3 @@ pub fn part2(input: String) {
 
     println!("\nPart2 result is: {:?}", sum);
 }
-
-// 45619 too high
-// 33916 too high
-//
-// 21740 not correct
-// 21725 too low
