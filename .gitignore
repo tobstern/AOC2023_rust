@@ -39,3 +39,7 @@ Cargo.lock
 
 # Ignore Rust's Test Output
 lib.rs.bk
+
+# ignore images for video making
+images/
+videos/
