@@ -16,8 +16,8 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
-// mod day17;
-// mod day18;
+mod day17;
+mod day18;
 // mod day19;
 // mod day20;
 // mod day21;
@@ -29,7 +29,7 @@ mod day16;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 3 {
-        println!("Please provide the day and part as command line arguments. Example: cargo run -- day01 part1");
+        println!("Please provide the day and part as command line arguments. Example: cargo run [-r] 1 1");
         return;
     }
     let mut day: &str = &args[1];
@@ -76,14 +76,14 @@ fn main() {
         ("15", "2") => day15::part2(input),
         ("16", "1") => day16::part1(input),
         ("16", "2") => day16::part2(input),
+        ("17", "1") => day17::part1(input),
+        ("17", "2") => day17::part2(input),
+        ("18", "1") => day18::part1(input),
+        ("18", "2") => day18::part2(input),
         _ => println!("Invalid day or part argument. Please provide a valid day such as '1' or '1_test[X]' and a part such as '1'."),
     }
 }
 
-// ("17", "1") => day17::part1(input),
-// ("17", "2") => day17::part2(input),
-// ("18", "1") => day18::part1(input),
-// ("18", "2") => day18::part2(input),
 // ("19", "1") => day19::part1(input),
 // ("19", "2") => day19::part2(input),
 // ("20", "1") => day20::part1(input),
