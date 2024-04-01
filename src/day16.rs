@@ -9,28 +9,27 @@
 //! If the beam encounters the flat side of a splitter (| or -), the beam is split into two beams going in each of the two directions the splitter's pointy ends are pointing. For instance, a rightward-moving beam that encounters a | splitter would split into two beams: one that continues upward from the splitter's column and one that continues downward from the splitter's column.
 use image::{ImageBuffer, Rgb};
 use ndarray::Array2;
-use rayon::result;
 use std::collections::HashSet;
 use std::process::Command;
 use std::time::Instant;
 
 // move the light
 fn step(
-    last: (usize, usize),
-    curr: (usize, usize),
-    map: &Array2<((usize, usize), char)>,
+    last: (i32, i32),
+    curr: (i32, i32),
+    map: &Array2<((i32, i32), char)>,
     row_len: i32,
     col_len: i32,
     mut step_count: &mut usize,
     mut print_map: &mut Vec<Vec<char>>,
     video: bool,
-) -> (Vec<bool>, Vec<(usize, usize)>) {
-    let grad = ((curr.0 - last.0) as i32, (curr.1 - last.1) as i32);
+) -> (Vec<bool>, Vec<(i32, i32)>) {
+    let grad = (curr.0 - last.0, curr.1 - last.1);
 
     // let l_ch = *map.get(&last).unwrap();
-    let c_ch = map[curr].1;
+    let c_ch = map[(curr.0 as usize, curr.1 as usize)].1;
 
-    let mut new_poss: Vec<(usize, usize)> = vec![];
+    let mut new_poss: Vec<(i32, i32)> = vec![];
     // if curr.i as i32 + grad.0 < 0
     //     && curr.j as i32 + grad.1 < 0
     //     && curr.i as i32 + grad.0 < row_len
@@ -100,14 +99,14 @@ fn step(
     let mut is_out_of_bound = Vec::new();
     // let max = usize::MAX;
     for pos in new_poss.clone() {
-        if pos.0 >= row_len as usize || pos.1 >= col_len as usize {
+        if pos.0 >= row_len || pos.0 < 0 || pos.1 >= col_len || pos.1 < 0 {
             is_out_of_bound.push(true);
         }
     }
 
     new_poss = new_poss
         .into_iter()
-        .filter(|pos| pos.0 < row_len as usize && pos.1 < col_len as usize)
+        .filter(|pos| pos.0 < row_len && pos.0 >= 0 && pos.1 < col_len && pos.1 >= 0)
         .collect();
 
     // save a new image with the next position(s) of the light
@@ -115,8 +114,8 @@ fn step(
     if video {
         make_pic(
             &new_poss,
-            row_len as usize,
-            col_len as usize,
+            row_len,
+            col_len,
             &mut step_count,
             &mut print_map,
         );
@@ -126,13 +125,13 @@ fn step(
 }
 
 fn move_light(
-    mut curr: (usize, usize),
-    next_poss: &(Vec<bool>, Vec<(usize, usize)>),
-    map: &Array2<((usize, usize), char)>,
+    mut curr: (i32, i32),
+    next_poss: &(Vec<bool>, Vec<(i32, i32)>),
+    map: &Array2<((i32, i32), char)>,
     row_len: i32,
     col_len: i32,
     mut found: bool,
-    mut states: &mut HashSet<((usize, usize), (usize, usize))>,
+    mut states: &mut HashSet<((i32, i32), (i32, i32))>,
     mut step_count: &mut usize,
     mut print_map: &mut Vec<Vec<char>>,
     video: bool,
@@ -214,20 +213,20 @@ fn move_light(
     found
 }
 
-pub fn parse_input(input: &String) -> Array2<((usize, usize), char)> {
+pub fn parse_input(input: &String) -> Array2<((i32, i32), char)> {
     let lines: Vec<_> = input.lines().collect();
     let row_len = input.lines().count();
     let col_len = input.lines().next().unwrap().len();
 
     Array2::from_shape_fn((row_len, col_len), |(i, j)| {
-        ((i, j), lines[i].chars().nth(j).unwrap())
+        ((i as i32, j as i32), lines[i].chars().nth(j).unwrap())
     })
 }
 
 fn make_pic(
-    next_poss: &Vec<(usize, usize)>,
-    row_len: usize,
-    col_len: usize,
+    next_poss: &Vec<(i32, i32)>,
+    row_len: i32,
+    col_len: i32,
     step_count: &mut usize,
     print_map: &mut Vec<Vec<char>>,
 ) {
@@ -242,13 +241,13 @@ fn make_pic(
 
     for (i, j) in next_poss.iter() {
         // change the char of print map at this position to '#'
-        print_map[*i][*j] = '#';
+        print_map[*i as usize][*j as usize] = '#';
     }
     // now create all '#' from print_map as black pixels and all other symbols as white pixels
     // and oversample it (otherwise it is too small!)
     for (i, line) in print_map.iter().enumerate() {
         for (j, ch) in line.iter().enumerate() {
-            let pixel = if next_poss.contains(&(i, j)) {
+            let pixel = if next_poss.contains(&(i as i32, j as i32)) {
                 // Rgb([255_u8, 255_u8, 0_u8]) // yellow/gold
                 // Rgb([255_u8, 102_u8, 102_u8]) // red
                 Rgb([0_u8, 255_u8, 0_u8]) // green
@@ -260,8 +259,8 @@ fn make_pic(
             for x in 0..scale_factor {
                 for y in 0..scale_factor {
                     img.put_pixel(
-                        (j * scale_factor + x) as u32,
-                        (i * scale_factor + y) as u32,
+                        (j as i32 * scale_factor + x) as u32,
+                        (i as i32 * scale_factor + y) as u32,
                         pixel,
                     );
                 }
@@ -306,10 +305,10 @@ fn create_video(num_steps: usize) {
 #[allow(unused)]
 pub fn part1(input: String) {
     // select video creation
-    let video: bool = true;
+    let video: bool = false;
 
-    let row_len = input.lines().count();
-    let col_len = input.lines().next().unwrap().len();
+    let row_len = input.lines().count() as i32;
+    let col_len = input.lines().next().unwrap().len() as i32;
 
     // start timer
     let now = Instant::now(); // mark time
@@ -325,8 +324,8 @@ pub fn part1(input: String) {
     // println!("print-map: {:?}", &print_map);
 
     // start at the top left corner and head right at first
-    let mut curr: (usize, usize) = (0, 1);
-    let mut last: (usize, usize) = (0, 0);
+    let mut curr: (i32, i32) = (0, 0);
+    let mut last: (i32, i32) = (0, -1);
 
     // step count
     let mut step_count = 0;
@@ -335,8 +334,8 @@ pub fn part1(input: String) {
     if video {
         make_pic(
             &vec![last, curr],
-            row_len as usize,
-            col_len as usize,
+            row_len,
+            col_len,
             &mut step_count,
             &mut print_map,
         );
@@ -346,8 +345,8 @@ pub fn part1(input: String) {
         last,
         curr,
         &map,
-        row_len as i32,
-        col_len as i32,
+        row_len,
+        col_len,
         &mut step_count,
         &mut print_map,
         video,
@@ -356,8 +355,9 @@ pub fn part1(input: String) {
 
     // save state: last & curr
     let mut states = HashSet::new();
-    let initial_state: ((usize, usize), (usize, usize)) = (last, curr);
-    states.insert(initial_state);
+    // let initial_state: ((i32, i32), (i32, i32)) = (last, curr);
+    // states.insert(initial_state);
+    
     // let mut states: Vec<((usize, usize), (usize, usize))> = vec![(last, curr)];
 
     // move the light
@@ -367,8 +367,8 @@ pub fn part1(input: String) {
         curr,
         &new_poss,
         &map,
-        row_len as i32,
-        col_len as i32,
+        row_len,
+        col_len,
         found,
         &mut states,
         &mut step_count,
@@ -407,11 +407,13 @@ pub fn part1(input: String) {
     let mut result = HashSet::new();
     for (left, right) in states.iter() {
         // if the found positions from states are not '#', change them to '#'
-        if print_map[left.0][left.1] != '#' {
-            print_map[left.0][left.1] = '#';
+        let first = print_map[left.0 as usize][left.1 as usize];
+        let second = print_map[right.0 as usize][right.1 as usize];
+        if first != '#' {
+            print_map[left.0 as usize][left.1 as usize] = '#';
         }
-        if print_map[right.0][right.1] != '#' {
-            print_map[right.0][right.1] = '#';
+        if second != '#' {
+            print_map[right.0 as usize][right.1 as usize] = '#';
         }
 
         // and insert them into a new HashSet to count them as result
@@ -421,8 +423,8 @@ pub fn part1(input: String) {
     // change all other symbols to '.' that are not '#'
     for i in 0..row_len {
         for j in 0..col_len {
-            if print_map[i][j] != '#' {
-                print_map[i][j] = '.';
+            if print_map[i as usize][j as usize] != '#' {
+                print_map[i as usize][j as usize] = '.';
             }
         }
     }
