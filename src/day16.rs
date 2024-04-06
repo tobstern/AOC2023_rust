@@ -112,13 +112,7 @@ fn step(
     // save a new image with the next position(s) of the light
     // step_count += 1;
     if video {
-        make_pic(
-            &new_poss,
-            row_len,
-            col_len,
-            &mut step_count,
-            &mut print_map,
-        );
+        make_pic(&new_poss, row_len, col_len, &mut step_count, &mut print_map);
     }
 
     (is_out_of_bound, new_poss)
@@ -147,19 +141,19 @@ fn move_light(
     'moving_light: for pos in &next_poss.1 {
         // 'moving_light: while next_poss.1.len() > 0 {
 
-        println!(
-            "\n\nnext_poss: {:?}, with curr_pos: {:?}",
-            &next_poss.1, &pos
-        );
+        // println!(
+        //     "\n\nnext_poss: {:?}, with curr_pos: {:?}",
+        //     &next_poss.1, &pos
+        // );
 
-        println!("last (before): {:?}, curr (before): {:?}", &last, &curr);
+        // println!("last (before): {:?}, curr (before): {:?}", &last, &curr);
         curr = *pos;
 
         // save the state
         // last_states = states.clone();
         states.insert((last, curr));
 
-        println!("last: {:?}, curr: {:?}", &last, &curr);
+        // println!("last: {:?}, curr: {:?}", &last, &curr);
 
         let (oob, nexts) = step(
             last,
@@ -171,11 +165,11 @@ fn move_light(
             &mut print_map,
             video,
         );
-        println!("oob: {:?}, nexts: {:?}", &oob, &nexts);
+        // println!("oob: {:?}, nexts: {:?}", &oob, &nexts);
 
         if nexts.len() == 0 {
             // next_poss.extend(curr);
-            println!("no next pos(s)!\n");
+            // println!("no next pos(s)!\n");
             // path ended abruptly
             // states.insert((curr, last));
             continue 'moving_light;
@@ -185,7 +179,7 @@ fn move_light(
         if states.contains(&(curr, nexts[0])) {
             found = true;
             // panic!("All are energized!");
-            println!("\n\n-------------------All are energized!-------------------\n\n");
+            // println!("\n\n-------------------All are energized!-------------------\n\n");
             // return found;
             continue 'moving_light;
         }
@@ -357,7 +351,7 @@ pub fn part1(input: String) {
     let mut states = HashSet::new();
     // let initial_state: ((i32, i32), (i32, i32)) = (last, curr);
     // states.insert(initial_state);
-    
+
     // let mut states: Vec<((usize, usize), (usize, usize))> = vec![(last, curr)];
 
     // move the light
@@ -438,21 +432,151 @@ pub fn part1(input: String) {
     println!("\nPart1 result is: {:?}", sum);
 }
 
-#[allow(unused)]
-pub fn part2(input: String) {
-    let lines = input.split("\n");
+pub fn tile_count(input: &String, last: (i32, i32), curr: (i32, i32)) -> usize {
+    // leave the following 2 variables, beacuse the functions for part 1 need them
+    // (purpose was debugging though)
+    let video: bool = false;
+    let mut print_map: Vec<Vec<char>> = input
+        .lines()
+        .map(|s| s.chars().collect())
+        .collect::<Vec<_>>();
 
-    let line_vec: Vec<&str> = lines.collect();
+    let row_len = input.lines().count() as i32;
+    let col_len = input.lines().next().unwrap().len() as i32;
 
     // start timer
     let now = Instant::now(); // mark time
+
+    let map = parse_input(&input);
+    // println!("map: {:?}", &map);
+
+    // start at the top left corner and head right at first
+    // let mut curr: (i32, i32) = (0, 0);
+    // let mut last: (i32, i32) = (0, -1);
+
+    // step count
+    let mut step_count = 0;
+
+    let mut new_poss = step(
+        last,
+        curr,
+        &map,
+        row_len,
+        col_len,
+        &mut step_count,
+        &mut print_map,
+        video,
+    );
+    // println!("new_poss: {:?}", &new_poss);
+
+    // save state: last & curr
+    let mut states = HashSet::new();
+
+    // move the light
+    // let mut new_states: HashSet<((usize, usize), (usize, usize))> = HashSet::new();
+    let mut found = false;
+    found = move_light(
+        curr,
+        &new_poss,
+        &map,
+        row_len,
+        col_len,
+        found,
+        &mut states,
+        &mut step_count,
+        &mut print_map,
+        video,
+    );
+
+    // println!("states: {:?}", &states);
 
     // record timer
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed);
 
-    // println!("\nPart2 result is: {:?}", sum);
+    // insert '#' for each pos from states into print_map
+    let mut result = HashSet::new();
+    for (left, right) in states.iter() {
+        // and insert them into a new HashSet to count them as result
+        result.insert((left.0, left.1));
+        result.insert((right.0, right.1));
+    }
+
+    let sum = result.len();
+    println!(
+        "\nFor last: {:?} and current: {:?}, result is: {:?}",
+        &last, &curr, sum
+    );
+
+    return sum;
 }
 
-// 6975 too low
-//
+#[allow(unused)]
+pub fn part2(input: String) {
+    // start timer
+    let now = Instant::now(); // mark time
+
+    // call part 1 to find the tile count
+    // loop it for all border tiles, as starting position
+    let mut result: HashSet<(i32, i32)> = HashSet::new();
+    let mut all_borders: Vec<((i32, i32), (i32, i32))> = Vec::new(); // ((last), (curr))
+
+    // create posis
+    let row_len = input.lines().count() as i32;
+    let col_len = input.lines().next().unwrap().len() as i32;
+
+    for row in 0..row_len {
+        for col in 0..col_len {
+            if row == 0 || col == 0 || row == row_len - 1 || col == col_len - 1 {
+                // all borders:
+                if row == col {
+                    // left-up corner & right-down corner
+                    if row == 0 {
+                        all_borders.push(((row - 1, col), (row, col)));
+                        all_borders.push(((row, col - 1), (row, col)));
+                    } else if row == row_len - 1 {
+                        all_borders.push(((row + 1, col), (row, col)));
+                        all_borders.push(((row, col + 1), (row, col)));
+                    }
+                } else if row == row_len - 1 && col == 0 {
+                    // left-down corner
+                    all_borders.push(((row + 1, col), (row, col)));
+                    all_borders.push(((row, col - 1), (row, col)));
+                } else if col == col_len - 1 && row == 0 {
+                    // right-up corner
+                    all_borders.push(((row - 1, col), (row, col)));
+                    all_borders.push(((row, col + 1), (row, col)));
+                } else if col == 0 {
+                    // left
+                    all_borders.push(((row, col - 1), (row, col)));
+                } else if col == col_len - 1 {
+                    // right
+                    all_borders.push(((row, col + 1), (row, col)));
+                } else if row == 0 {
+                    // top
+                    all_borders.push(((row - 1, col), (row, col)));
+                } else if row == row_len - 1 {
+                    // bottom
+                    all_borders.push(((row + 1, col), (row, col)));
+                }
+            }
+        }
+    }
+
+    println!("{:?}", &all_borders);
+
+    // now loop and calc:
+    let mut all_results = Vec::new();
+    for (last, curr) in all_borders {
+        let curr_res = tile_count(&input, last, curr);
+
+        all_results.push(curr_res);
+    }
+
+    // record timer
+    let elapsed = now.elapsed();
+    println!("Elapsed: {:.2?}", elapsed);
+
+    let longest = all_results.iter().max();
+    println!("\nPart2 result is: {:?}", longest.unwrap());
+}
