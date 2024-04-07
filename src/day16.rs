@@ -155,7 +155,7 @@ fn move_light(
 
         // println!("last: {:?}, curr: {:?}", &last, &curr);
 
-        let (oob, nexts) = step(
+        let (_oob, nexts) = step(
             last,
             curr,
             &map,
@@ -457,7 +457,7 @@ pub fn tile_count(input: &String, last: (i32, i32), curr: (i32, i32)) -> usize {
     // step count
     let mut step_count = 0;
 
-    let mut new_poss = step(
+    let new_poss = step(
         last,
         curr,
         &map,
@@ -474,8 +474,8 @@ pub fn tile_count(input: &String, last: (i32, i32), curr: (i32, i32)) -> usize {
 
     // move the light
     // let mut new_states: HashSet<((usize, usize), (usize, usize))> = HashSet::new();
-    let mut found = false;
-    found = move_light(
+    let found = false;
+    move_light(
         curr,
         &new_poss,
         &map,
