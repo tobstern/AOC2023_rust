@@ -18,7 +18,7 @@ mod day15;
 mod day16;
 mod day17;
 mod day18;
-// mod day19;
+mod day19;
 // mod day20;
 // mod day21;
 // mod day22;
@@ -80,12 +80,12 @@ fn main() {
         ("17", "2") => day17::part2(input),
         ("18", "1") => day18::part1(input),
         ("18", "2") => day18::part2(input),
+        ("19", "1") => day19::part1(input),
+        ("19", "2") => day19::part2(input),
         _ => println!("Invalid day or part argument. Please provide a valid day such as '1' or '1_test[X]' and a part such as '1'."),
     }
 }
 
-// ("19", "1") => day19::part1(input),
-// ("19", "2") => day19::part2(input),
 // ("20", "1") => day20::part1(input),
 // ("20", "2") => day20::part2(input),
 // ("21", "1") => day21::part1(input),
